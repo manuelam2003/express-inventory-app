@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    h1 #{title}: #{item.name}
+
+    p #[strong Description: ] #{item.description}
+    p #[strong Category: ]
+        a(href=item.category.url) #{item.category.name}
+    p #[strong Price: ] #{item.price}
+    p #[strong Number in stock: ] #{item.number_in_stock} 
+
+    hr
+    p Do you really want to delete this Book?
+
+    form(method='POST')
+        div.form-group
+            input#id.form-control(type='hidden' name='id', value=item._id )
+
+        button.btn.btn-primary(type='submit') Delete
