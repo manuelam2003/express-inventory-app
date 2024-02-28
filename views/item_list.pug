@@ -1,0 +1,24 @@
+extends layout 
+
+block content 
+  h1=title 
+  if item_list.length 
+    table.table.table-striped.table-bordered.table-hover
+      thead 
+        tr 
+          th Name
+          th Description 
+          th Category 
+          th Price 
+          th Number in Stock 
+      tbody 
+        each item in item_list 
+          tr 
+            td
+              a(href=item.url) #{item.name}
+            td=item.description 
+            td=item.category.name
+            td=item.price
+            td=item.number_in_stock
+  else 
+    p There are no items.

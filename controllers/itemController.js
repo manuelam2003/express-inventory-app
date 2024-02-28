@@ -4,12 +4,24 @@ const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
 exports.index = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Site Home Page");
+  const [numItems, numCategories] = await Promise.all([
+    Item.countDocuments({}).exec(),
+    Category.countDocuments({}).exec(),
+  ]);
+  res.render("index", {
+    title: "Inventory App Home",
+    item_count: numItems,
+    category_count: numCategories,
+  });
 });
 
 // Display list of all items.
 exports.item_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: item list");
+  const allItems = await Item.find()
+    .sort({ name: 1 })
+    .populate("category")
+    .exec();
+  res.render("item_list", { title: "Item List", item_list: allItems });
 });
 
 // Display detail page for a specific item.
