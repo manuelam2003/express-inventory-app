@@ -40,13 +40,60 @@ exports.item_detail = asyncHandler(async (req, res, next) => {
 
 // Display item create form on GET.
 exports.item_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: item create GET");
+  const [allItems, allCategories] = await Promise.all([
+    Item.find().sort({ name: 1 }).exec(),
+    Category.find().sort({ name: 1 }).exec(),
+  ]);
+  res.render("item_form", {
+    title: "Create Item",
+    categories: allCategories,
+  });
 });
 
 // Handle item create on POST.
-exports.item_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: item create POST");
-});
+exports.item_create_post = [
+  body("name", "Name must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("description", "Description must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("category", "Category must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("price", "Price must not be negative").trim().isNumeric().escape(),
+  body("number_in_stock", "Number in stock must not be negative").custom(
+    (value) => {
+      if (value > 0) {
+        return true;
+      }
+    }
+  ),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const item = new Item({
+      name: req.body.name,
+      description: req.body.description,
+      category: req.body.category,
+      price: req.body.price,
+      number_in_stock: req.body.number_in_stock,
+    });
+    if (!errors.isEmpty()) {
+      const allCategories = await Category.find().sort({ name: 1 }).exec();
+      res.render("item_form", {
+        title: "Create Item",
+        item: item,
+        categories: allCategories,
+        errors: errors.array(),
+      });
+    } else {
+      await item.save();
+      res.redirect(item.url);
+    }
+  }),
+];
 
 // Display item delete form on GET.
 exports.item_delete_get = asyncHandler(async (req, res, next) => {
